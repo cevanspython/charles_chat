@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Charles Chat</title>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@400&display=swap">
+    <style>
+        /* Global styles */
+        body {
+            background-color: #333333;
+            margin: 0;
+            height: 100vh;
+            font-family: 'Roboto', sans-serif;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .content-container {
+            width: 800px;
+            height: 80vh;
+            background: #ffffff;
+            box-sizing: border-box;
+            border-radius: 10px; /* Added border radius to the content container */
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+            border: 2px solid #FF69B4;
+        }
+
+        .content-wrapper {
+            display: flex;
+            justify-content: center;
+            background-size: 32px 32px; /* Adjust the size to match your tile pattern size */
+            background-repeat: repeat, repeat;
+            background-image: url('hexagon.png'), url('hexagon.png');
+            background-color: #f2f2f2; /* Updated background color to a lighter shade of gray */
+            border-radius: 10px; /* Added border radius to the content wrapper */
+        }
+
+        .controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+        }
+
+        .controls .left-controls {
+            display: flex;
+            gap: 10px;
+        }
+
+        .controls .right-controls {
+            text-align: right;
+        }
+
+        .grid-container {
+            width: 100%;
+            display: grid;
+            grid-template-columns: 350px 400px;
+            grid-template-rows: auto 1fr;
+            gap: 1em;
+            height: calc(100% - 10px);
+            overflow: hidden;
+        }
+
+        .title {
+            grid-column: span 2;
+            text-align: center;
+            font-family: 'Courier New', monospace;
+            margin: 5px;
+        }
+
+        .left-column {
+            padding: 0px 15px 15px;
+            box-sizing: border-box;
+            font-family: 'Roboto', sans-serif;
+            font-size: 14px;
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
+            border-radius: 10px;
+        }
+
+        .right-column {
+            margin-top: 0px;
+            padding: 0px;
+            box-sizing: border-box;
+            font-family: 'Roboto', sans-serif;
+            font-size: 14px;
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
+            border-radius: 10px;
+        }
+
+        .link-value {
+            white-space: nowrap;
+        }
+
+        .code-like-text {
+            font-size: 14px;
+            padding: 10px;
+            margin-top: 0;
+            margin-bottom: 0;
+            word-wrap: break-word;
+        }
+
+        .menu-item {
+            cursor: pointer;
+            padding: 0px;
+            margin: 1px 1px;
+            background-color: #FAFAFA;
+            border-radius: 2px;
+            display: inline-block;
+        }
+
+        .menu-item.selected {
+            background-color: #F48E3B;
+            color: white;
+        }
+
+        .notification {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            padding: 10px;
+            background-color: #FF69B4;
+            color: white;
+            border-radius: 5px;
+        }
+
+        .menu-label {
+            margin-bottom: 10px;
+            font-size: 16px;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+        }
+
+        .tiled-pattern {
+            background-image: linear-gradient(45deg, #ccc 25%, transparent 25%, transparent 75%, #ccc 75%, #ccc),
+                            linear-gradient(45deg, #ccc 25%, transparent 25%, transparent 75%, #ccc 75%, #ccc);
+            background-size: 16px 16px;
+            background-position: 0 0, 8px 8px;
+        }
+
+        #word-count {
+            color: black;
+            font-size: 14px;
+            font-weight: bold;
+            padding: 0px;
+            padding-right: 40px;
+            margin: 0px;
+            text-align: left;
+        }
+
+        #topics-list {
+            list-style: none;
+            padding-left: 0;
+        }
+
+        #copy-button {
+            margin-bottom: 5px;
+            margin-right: 0px;
+            background-color: #FF69B4;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            padding: 5px 10px;
+            cursor: pointer;
+            align-self: flex-start;
+        }
+
+        #selected-details {
+            height: 450px;
+            overflow-y: auto;
+            padding: 10px;
+            border: 1px solid #FF69B4;
+            border-radius: 5px;
+            box-sizing: border-box;
+            word-wrap: normal;
+            font-family: 'Courier New', monospace;
+        }
+
+        #details {
+            margin-bottom: 0px;
+        }
+
+        #external-link {
+            color: #ff8c00;
+            text-decoration: none;
+            font-family: 'Roboto', sans-serif;
+            font-size: 14px;
+            text-align: right;
+        }
+
+        #copy-button,
+        #word-count,
+        #external-link {
+            font-family: 'Roboto', sans-serif;
+        }
+
+    </style>
+</head>
+<body>
+    <div class="content-wrapper">
+        <div class="content-container">
+            <div class="grid-container">
+                <div class="title"></div>
+                <div class="left-column" id="menu-items"></div>
+                <div class="right-column">
+                    <div class="controls">
+                        <div class="left-controls">
+                            <button id="copy-button">Copy</button>
+                            <span id="word-count" class="word-count">Words: 0</span>
+                        </div>
+                        <div class="right-controls">
+                            <a href="https://chat.openai.com/" target="_blank" id="external-link">chat.openai.com</a>
+                        </div>
+                    </div>
+                    <div id="details" class="details-container">
+                        <div id="selected-details" class="code-like-text"></div>
+                    </div>
+                    <div id="notification" class="notification-container"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="data.js"></script>
+    <script>
+        const selectedDetailsDiv = document.getElementById("selected-details");
+        const wordCountSpan = document.getElementById("word-count");
+
+        function updateDetails() {
+            const selectedNames = Array.from(document.querySelectorAll(".menu-item.selected"))
+                .map(item => item.dataset.topic);
+
+            const detailsString = jsonData.topics
+                .filter(topic => selectedNames.includes(topic.topic.toLowerCase())) // Use the lowercase key name "topic"
+                .map(topic => {
+                    const { topic: key, link, code } = topic; // Use the lowercase key name "topic"
+                    return `Topic: ${key}\n${link}\n${code}\n`;
+                })
+                .join('\n'); // Add an extra newline between each topic's details
+
+            const tempDiv = document.createElement('div');
+            tempDiv.innerHTML = detailsString;
+
+            const linkElements = tempDiv.querySelectorAll('.link-value');
+            linkElements.forEach(linkElement => {
+                const link = linkElement.querySelector('a').href;
+                linkElement.textContent = link;
+                linkElement.href = link;
+                linkElement.target = '_blank';
+                linkElement.innerHTML = `<a href="${link}" target="_blank">${link}</a>`;
+            });
+
+            const detailsWithoutKeys = tempDiv.innerHTML;
+            selectedDetailsDiv.innerHTML = detailsWithoutKeys.replace(/\n/g, '<br>'); // Replace newlines with <br> tags
+
+            const wordCount = detailsWithoutKeys.split(/\s+/).filter(Boolean).length;
+            wordCountSpan.textContent = `Word Count: ${wordCount}`;
+        }
+
+function generateMenuItems() {
+    const menuItemsContainer = document.getElementById("menu-items");
+    menuItemsContainer.innerHTML = "";
+
+    // Sort topics alphabetically based on the "topic" value
+    // Modified sorting logic to bring items that start with "_" to the top
+    jsonData.topics.sort((a, b) => {
+        const aIsSpecial = a.topic.startsWith("_");
+        const bIsSpecial = b.topic.startsWith("_");
+
+        if (aIsSpecial === bIsSpecial) {
+            return a.topic.localeCompare(b.topic);
+        }
+
+        return aIsSpecial ? -1 : 1;
+    });
+
+    jsonData.topics.forEach((topic, index) => {
+        const menuItem = document.createElement("div");
+        menuItem.className = "menu-item";
+        menuItem.dataset.topic = topic.topic.toLowerCase();
+        const lineNumber = String(index + 1).padStart(2, '0');
+        menuItem.innerHTML = `<span style="font-family: 'Courier New', monospace; color: gray;">${lineNumber}</span> ${topic.topic}`;
+        menuItem.addEventListener("click", () => {
+            menuItem.classList.toggle("selected");
+            updateDetails();
+        });
+
+        menuItemsContainer.appendChild(menuItem);
+    });
+}
+
+
+
+        generateMenuItems();
+
+        function showNotification(message) {
+            const notificationContainer = document.getElementById("notification");
+            const notification = document.createElement("div");
+            notification.className = "notification";
+            notification.innerText = message;
+            notificationContainer.appendChild(notification);
+
+            setTimeout(() => {
+                notification.remove();
+            }, 2000);
+        }
+
+        function copyToClipboard() {
+            const selectedDetailsText = selectedDetailsDiv.textContent;
+            const textArea = document.createElement('textarea');
+            textArea.value = selectedDetailsText;
+            document.body.appendChild(textArea);
+            textArea.select();
+            document.execCommand('copy');
+            document.body.removeChild(textArea);
+
+            showNotification('Details copied to clipboard!');
+        }
+
+        const copyButton = document.getElementById('copy-button');
+        copyButton.addEventListener('click', copyToClipboard);
+    </script>
+</body>
+</html>
